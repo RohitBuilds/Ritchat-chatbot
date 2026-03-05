@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ritchat</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#6366f1",
+        darkbg: "#0f172a",
+        card: "#1e293b"
+      }
+    }
+  }
+}
+</script>
+
+</head>
+
+<body class="bg-darkbg text-white flex flex-col h-screen">
+
+<!-- HEADER -->
+<header class="p-4 border-b border-gray-700 flex justify-between items-center">
+
+<h1 class="text-2xl font-bold text-primary">RITCHAT</h1>
+
+<!-- Custom Dropdown -->
+<div class="relative">
+
+<button id="modeBtn"
+class="bg-card border border-gray-600 rounded-lg px-4 py-2 text-sm hover:bg-gray-700 transition">
+Professional
+</button>
+
+<div id="modeMenu"
+class="hidden absolute right-0 top-full mt-2 w-44 bg-gray-800 border border-gray-600 rounded-lg shadow-lg overflow-hidden">
+
+<div class="p-2 hover:bg-gray-700 cursor-pointer" data-value="funny">
+Funny & Witty
+</div>
+
+<div class="p-2 hover:bg-gray-700 cursor-pointer" data-value="professional">
+Professional
+</div>
+
+<div class="p-2 hover:bg-gray-700 cursor-pointer" data-value="angry">
+Angry
+</div>
+
+</div>
+ <button onclick="clearChat()" class="bg-red-500 px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition">
+      Clear Chat
+  </button>
+</div>
+
+</header>
+
+
+<!-- CHAT CONTAINER -->
+<main id="chatContainer"
+class="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth">
+
+<div class="bg-card p-4 rounded-2xl max-w-md shadow-lg">
+<p class="text-2xl font-bold text-primary">NAMASTE</p>
+<p class="text-primary">Choose a mode and start chatting.</p>
+</div>
+
+</main>
+
+<!-- <button onclick="clearChat()"
+class="bg-red-500 px-3 py-1 rounded-lg text-sm">
+Clear
+</button> -->
+
+<!-- INPUT SECTION -->
+<div class="p-4 border-t border-gray-700 flex gap-3">
+
+<input
+id="userInput"
+type="text"
+placeholder="Type your query..."
+class="flex-1 bg-card border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+/>
+
+<button
+onclick="sendMessage()"
+class="bg-primary px-6 py-3 rounded-xl font-semibold hover:scale-105 transition transform active:scale-95">
+Send
+</button>
+
+</div>
+
+
+<script>
+
+const chatContainer = document.getElementById("chatContainer");
+const inputField = document.getElementById("userInput");
+
+const modeBtn = document.getElementById("modeBtn");
+const modeMenu = document.getElementById("modeMenu");
+
+let selectedMode = "funny";
+
+function clearChat() {
+  // Keep the first child (welcome message), remove all others
+  while (chatContainer.children.length > 1) {
+    chatContainer.removeChild(chatContainer.lastChild);
+  }
+}
+
+
+/* Dropdown Toggle */
+
+modeBtn.addEventListener("click", () => {
+  modeMenu.classList.toggle("hidden");
+});
+
+
+/* Mode Selection */
+
+document.querySelectorAll("#modeMenu div").forEach(item => {
+
+  item.addEventListener("click", () => {
+
+    selectedMode = item.dataset.value;
+
+    modeBtn.innerText = item.innerText;
+
+    modeMenu.classList.add("hidden");
+
+  });
+
+});
+
+
+/* Add Message */
+
+function addMessage(content, isUser=false) {
+
+const messageDiv = document.createElement("div");
+
+messageDiv.className = `
+p-4 rounded-2xl max-w-md shadow-lg
+${isUser ? "bg-primary self-end ml-auto text-white" : "bg-card"}
+`;
+
+messageDiv.innerText = content;
+
+chatContainer.appendChild(messageDiv);
+
+chatContainer.scrollTop = chatContainer.scrollHeight;
+
+}
+
+
+/* Send Message */
+
+async function sendMessage() {
+
+const message = inputField.value.trim();
+
+if (!message) return;
+
+addMessage(message, true);
+
+inputField.value = "";
+
+const mode = selectedMode;
+
+addMessage("Ritchat is typing...");
+
+try {
+
+const response = await fetch("http://127.0.0.1:8000/chat", {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+message: message,
+mode: mode
+})
+
+});
+
+const data = await response.json();
+
+chatContainer.lastChild.remove();
+
+addMessage(data.response);
+
+}
+
+catch (error) {
+
+chatContainer.lastChild.remove();
+
+addMessage("Error connecting to server.");
+
+console.error(error);
+
+}
+
+}
+
+
+/* Enter Key Send */
+
+inputField.addEventListener("keypress", function(e) {
+
+if (e.key === "Enter") sendMessage();
+
+});
+
+</script>
+
+</body>
+</html>

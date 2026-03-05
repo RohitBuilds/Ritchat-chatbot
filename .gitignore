@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# Node / Frontend
+node_modules/
+
+# VSCode / OS
+.vscode/
+.DS_Store
