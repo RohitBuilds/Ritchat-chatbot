@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,4 +14,7 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    return FileResponse("index.html")
+    return FileResponse(
+        "index.html",
+        media_type="text/html"
+    )
