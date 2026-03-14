@@ -1,12 +1,10 @@
-from fastapi import FastAPI
-from chatbot import chat
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+import os
 
-app = FastAPI()
+app.mount("/static", StaticFiles(directory="."), name="static")  # serve files from root
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return {"message": "Ritchat API working"}
-
-@app.get("/chat")
-def chat_api(msg: str):
-    return {"response": chat(msg)}
+    with open("index.html") as f:
+        return HTMLResponse(content=f.read())
