@@ -1,8 +1,12 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
+
+class ChatRequest(BaseModel):
+    message: str
+    mode: str
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,9 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def home():
-    return FileResponse(
-        "index.html",
-        media_type="text/html"
-    )
+@app.post("/")
+def chat(data: ChatRequest):
+    return {"response": f"You said: {data.message} in {data.mode} mode"}
